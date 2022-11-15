@@ -37,6 +37,16 @@ Paddle_length:
 ##############################################################################
 # Mutable Data
 ##############################################################################
+#
+# .space gives the address
+#
+# to mutate values saved in .space
+#
+# 1. la $t0, paddle_left
+#
+# 2. sw $t1, 0($t0)
+#
+#########  PADDLE  ######
 paddle_left:
 	.space 4 #store position of left most point 
 paddle_right:
@@ -45,6 +55,17 @@ paddle_left_old:
 	.space 4 #store positin of right most point (old)
 paddle_right_old:
 	.space 4 #store positin of right most point (old)
+########  BALL  #########
+ball_current_x:
+	.space 4 # x * 4 gives the offset should be added to ADDR_DSPL to locate the current x_axis
+ball_currrent_y:
+	.space  # y * 128 gives the offset should also be added to ADDR_DSPL to locatetbe current y_axis
+ball_current_speed:
+	.space 4 #During Initialization stage, this should be set to 2 (default speed)
+ball_current_direction:
+	.space 4 # During Initialization stage, this should be set to 90 (default direction)
+ball_move_status:
+	.word 0 # by default, ball should not be moving
 ##############################################################################
 # Code
 ##############################################################################
@@ -131,8 +152,6 @@ game_loop:
 
 
 # 1a. Check if key has been pressed
-
-
 lw $t0 , ADDR_KBRD  # $t 0 = b a s e a d d r e s s f o r k e y b o a r d
 lw $t8 , 0 ($t0)  # Load f i r s t word from k e y b o a r d
 beq $t8 , 1 , keyboardinput # I f f i r s t word 1 , key i s p r e s s e d
@@ -147,12 +166,19 @@ keyboardinput: # A key i s p r e s s e d
 	beq $t2, 100, update_paddle_move_right
 	
 # 2a. Check for collisions
+Collision checker:
+
+
+
+
+
 # 2b. Update locations (paddle, ball)
+
+#######Update Ball #########
+Ball_movement:
 
 
 #######Update paddle###############
-
-###move left###
 
 
 update_paddle_move_left:
@@ -322,7 +348,7 @@ Update_paddle:
 # 4. Sleep
 
 #addi	$v0, $zero, 32	# syscall sleep
-	#addi	$a0, $zero, 66	# 66 ms 
+	#addi	$a0, $zero, 66	
 	#syscall
 li $v0 , 32
 li $a0 , 15
