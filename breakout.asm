@@ -65,7 +65,7 @@ ball_current_speed:
 ball_current_direction:
 	.space 4 # During Initialization stage, this should be set to 90 (default direction)
 ball_move_status:
-	.word 0 # by default, ball should not be moving
+	.space 4 # During Initialization stage, this should be set to 0 (default status it got changed only when user first press a key)
 ##############################################################################
 # Code
 ##############################################################################
