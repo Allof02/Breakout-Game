@@ -311,7 +311,7 @@ Update_paddle:
 	
 	draw_UPDATED_paddle:
 	beqz $t2, end_of_draw_updated_paddle
-		sw $t1, 0($t0)   #send the signal address to bitmap with colour in hexdecimal
+		sw $t1, 0($t0)   
 		addi $t0, $t0, 4 #increment address by 4 bytes
 		addi $t2, $t2, -1
 		j draw_UPDATED_paddle
@@ -322,7 +322,7 @@ Update_paddle:
 # 4. Sleep
 
 #addi	$v0, $zero, 32	# syscall sleep
-	#addi	$a0, $zero, 66	# 66 ms #wo cao si ni ge ma, sha bi dong xi zhi neng pao 15fps
+	#addi	$a0, $zero, 66	# 66 ms 
 	#syscall
 li $v0 , 32
 li $a0 , 15
