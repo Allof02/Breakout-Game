@@ -143,8 +143,8 @@ b game_loop
 keyboardinput: # A key i s p r e s s e d
 	lw $t2 , 4 ( $t0 ) # Load s e c o n d word from k e y b o a r d
 	
-	beq $t2,  100, update_paddle_move_left 
-	beq $t2, 97, update_paddle_move_right
+	beq $t2,  97, update_paddle_move_left 
+	beq $t2, 100, update_paddle_move_right
 	
 # 2a. Check for collisions
 # 2b. Update locations (paddle, ball)
@@ -170,8 +170,10 @@ update_paddle_move_left:
 	
 	#3584 is the left wall;
 	li $t2, Left_boundary #load 3584 to t2
+	lw $t5, ADDR_DSPL
+	add $t5, $t5, $t2
 	
-	beq $t1, $t2, end_of_update_paddle_move_left #if t1 = t2, it means paddle will hit the wall, so don't update (move to left)
+	beq $t1, $t5, end_of_update_paddle_move_left #if t1 = t5, it means paddle will hit the wall, so don't update (move to left)
 	
 	
 	# $t1 saved the most updated position of the paddle_left
@@ -206,8 +208,10 @@ update_paddle_move_right:
 	
 	#3708 is the left wall;
 	addi $t2, $zero, Right_boundary #load 3708 to t2
+	lw $t5, ADDR_DSPL
+	addi, $t5, $t5, Right_boundary
 	
-	beq $t2, $t4, end_of_update_paddle_move_right #if t4 = t2, it means paddle will hit the wall, so don't update (move to right)
+	beq $t4, $t5, end_of_update_paddle_move_right #if t4 = t2, it means paddle will hit the wall, so don't update (move to right)
 	
 	# $t1 saved the most updated position of the paddle_left
 	#$t4 saved the most updated position of the paddle_right
@@ -302,13 +306,13 @@ Update_paddle:
 	
 	##Draw new paddle
 	li $t1, GREEN # set to green
-	lw $t0, paddle_left # LOAD NEWEST LEFT POSITION OF THE PADDLE
+	lw $t0, paddle_left # (Memory address)LOAD NEWEST LEFT POSITION OF THE PADDLE
 	li $t2, Paddle_length #counter
 	
 	draw_UPDATED_paddle:
 	beqz $t2, end_of_draw_updated_paddle
-		sw $t1, 0($t0)  
-		addi $t0, $t0, 4
+		sw $t1, 0($t0)   #send the signal address to bitmap with colour in hexdecimal
+		addi $t0, $t0, 4 #increment address by 4 bytes
 		addi $t2, $t2, -1
 		j draw_UPDATED_paddle
 		
@@ -317,9 +321,12 @@ Update_paddle:
 	
 # 4. Sleep
 
-addi	$v0, $zero, 32	# syscall sleep
-	addi	$a0, $zero, 66	# 66 ms
-	syscall
+#addi	$v0, $zero, 32	# syscall sleep
+	#addi	$a0, $zero, 66	# 66 ms #wo cao si ni ge ma, sha bi dong xi zhi neng pao 15fps
+	#syscall
+li $v0 , 32
+li $a0 , 15
+syscall
 
 #5. Go back to 1
     b game_loop
