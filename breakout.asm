@@ -69,8 +69,10 @@ ball_current_x:
 	.space 4 # x * 4 gives the offset should be added to ADDR_DSPL to locate the current x_axis
 ball_current_y:
 	.space 4# y * 128 gives the offset should also be added to ADDR_DSPL to locatetbe current y_axis
-ball_current_speed:
-	.space 4 #During Initialization stage, this should be set to 2 (default speed)
+ballx_current_speed:
+	.space 4 
+bally_current_speed:
+	.space 4 
 ball_current_direction:
 	.space 4 # During Initialization stage, this should be set to 90 (default direction)
 ball_move_status:
