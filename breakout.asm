@@ -59,13 +59,19 @@ paddle_right_old:
 ball_current_x:
 	.space 4 # x * 4 gives the offset should be added to ADDR_DSPL to locate the current x_axis
 ball_currrent_y:
-	.space  # y * 128 gives the offset should also be added to ADDR_DSPL to locatetbe current y_axis
+	.space 4# y * 128 gives the offset should also be added to ADDR_DSPL to locatetbe current y_axis
 ball_current_speed:
 	.space 4 #During Initialization stage, this should be set to 2 (default speed)
 ball_current_direction:
 	.space 4 # During Initialization stage, this should be set to 90 (default direction)
 ball_move_status:
 	.space 4 # During Initialization stage, this should be set to 0 (default status it got changed only when user first press a key)
+############BLOCK ARRAYs#######
+Left_array:
+	.word 772, 784, 796, 808,820,832,844,856,868,880
+Right_array:
+	.word 780, 792, 804, 816,828,840,852,864,876,888
+	
 ##############################################################################
 # Code
 ##############################################################################
@@ -130,16 +136,21 @@ main:
 		j draw_original_paddle
 	end_of_draw_original_paddle:
 	
-	#3636, 3656
+	#3636, 3652
 	lw $t0, ADDR_DSPL 
 	addi $t0, $t0, 3636
 	la $t9, paddle_left
 	sw $t0, 0($t9) #store initial left point of paddle to memory
 	
 	lw $t1, ADDR_DSPL 
-	addi $t1, $t1, 3656
+	addi $t1, $t1, 3652
 	la $t8, paddle_right
 	sw $t1, 0($t8) #store initial right point of paddle to memory
+	
+	
+	
+	
+	
 
 game_loop:
 
@@ -166,7 +177,7 @@ keyboardinput: # A key i s p r e s s e d
 	beq $t2, 100, update_paddle_move_right
 	
 # 2a. Check for collisions
-Collision checker:
+
 
 
 
@@ -175,7 +186,7 @@ Collision checker:
 # 2b. Update locations (paddle, ball)
 
 #######Update Ball #########
-Ball_movement:
+
 
 
 #######Update paddle###############
@@ -218,7 +229,7 @@ update_paddle_move_left:
 	end_of_update_paddle_move_left:
 	
 	#THIS LINE IS ONLY FOR TEST
-	j Clean_screen
+	j Update_paddle_left
 
 update_paddle_move_right:
 	la $t8, paddle_left
@@ -250,13 +261,12 @@ update_paddle_move_right:
 	la $t6, paddle_right_old
 	
 	sw $t0, 0($t7)
-	sw $t3, ($t6)
+	sw $t3, 0($t6)
 	
 	end_of_update_paddle_move_right:
 	
 	#THIS LINE IS ONLY FOR TEST
-	j Clean_screen
-	
+	j Update_paddle_right
 	
 	
 	
@@ -266,93 +276,52 @@ update_paddle_move_right:
 	
 # 3. Re-Draw the screen
 
-###############RE-Draw Border##############################
-Clean_screen:
-  	li $t0, 1024
-  	lw $t1, ADDR_DSPL
-  	li $t2, BLACK
-  clean_screen_loop:
-  	beqz $t0, end_clean_screen_loop
-  	sw $t2, 0($t1)
-  	addi $t1, $t1, 4
-  	addi $t0, $t0, -1
-  	j clean_screen_loop
-  	
-  	end_clean_screen_loop:
-
-
-Re_draw_border:
- lw $t0, ADDR_DSPL	                                      # $t0 stores the base address for display
-	li $t1, 0xff0000	                                         # $t1 stores the red colour code
-		
-	li $t2, 32                                                 #t2 is the counte
-	addi $t0, $t0, 640
-	re_draw_top_border:
-		beqz $t2, end_of_re_top_border
-		sw $t1, 0($t0)
-		addi $t0, $t0, 4
-		addi $t2, $t2, -1
-		j re_draw_top_border
-	end_of_re_top_border:
-	
-	lw $t0, ADDR_DSPL                                         #reset t0
-	addi $t0, $t0, 640 
-	li $t2, 24                                                          #t2 is the counter
-	re_draw_left_border:
-		beqz $t2, end_of_re_left_border
-		sw $t1, 0($t0)
-		addi $t0, $t0, 128
-		addi $t2, $t2, -1
-		j re_draw_left_border 
-	
-	end_of_re_left_border:
-	
-	lw $t0, ADDR_DSPL                                  #reset t0
-	addi $t0, $t0, 764
-	li $t2, 24                                                   #t2 is the counter
-	re_draw_right_border:
-	
-		beqz $t2, end_of_re_right_border
-		sw $t1, 0($t0)
-		addi $t0, $t0, 128
-		addi $t2, $t2, -1
-		j re_draw_right_border 
-	
-	end_of_re_right_border:
-	
-#####################################################################
-##########UPDATE PADDLE#########################	
-Update_paddle:
-	##erase old positions of paddle
-	#li $t4, BLACK # load black
-	#la $t8, paddle_left_old
-	#la $t9, paddle_right_old
-	#sw $t4, 0($t8)
-	#sw $t4, 0($t9)
+##########UPDATE PADDLE#########################
+#                                                                                                             #
+#Method used: erase one spot paint one spot                               #
+#                                                                                                             #
+###############################################
+Update_paddle_left:
 	
 	##Draw new paddle
 	li $t1, GREEN # set to green
+	li $t3, BLACK
 	lw $t0, paddle_left # (Memory address)LOAD NEWEST LEFT POSITION OF THE PADDLE
-	li $t2, Paddle_length #counter
+	lw $t2, paddle_right_old
 	
-	draw_UPDATED_paddle:
-	beqz $t2, end_of_draw_updated_paddle
-		sw $t1, 0($t0)   
-		addi $t0, $t0, 4 #increment address by 4 bytes
-		addi $t2, $t2, -1
-		j draw_UPDATED_paddle
+	sw $t1, 0($t0)
+	sw $t3, 0($t2)
+	
 		
-	 end_of_draw_updated_paddle:
+	 end_of_Update_paddle_left:
+	 #this line just for test, need to jump to other section later
+	 b sleep
+	 
+
+Update_paddle_right:
+
+	li $t1, GREEN # set to green
+	li $t3, BLACK
+	lw $t0, paddle_right # (Memory address)LOAD NEWEST LEFT POSITION OF THE PADDLE
+	lw $t2, paddle_left_old
+	
+	sw $t1, 0($t0)
+	sw $t3, 0($t2)
+	
+	end_of_Update_paddle_right:
+	#this line just for test, need to jump to other section later
+	b sleep
+
+
+
 	
 	
 # 4. Sleep
-
-#addi	$v0, $zero, 32	# syscall sleep
-	#addi	$a0, $zero, 66	
-	#syscall
+sleep: 
 li $v0 , 32
-li $a0 , 15
+li $a0 , 20
 syscall
+
 
 #5. Go back to 1
     b game_loop
